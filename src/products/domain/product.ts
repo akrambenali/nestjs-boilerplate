@@ -15,9 +15,9 @@ export class Product {
 
   @ApiProperty({
     type: () => String,
-    nullable: true,
+    nullable: false,
   })
-  unit?: string | null;
+  unit: string;
 
   @ApiProperty({
     type: () => Number,
@@ -27,9 +27,9 @@ export class Product {
 
   @ApiProperty({
     type: () => String,
-    nullable: true,
+    nullable: false,
   })
-  description?: string | null;
+  description: string;
 
   @ApiProperty({
     type: () => String,

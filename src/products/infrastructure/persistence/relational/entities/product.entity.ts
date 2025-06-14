@@ -24,10 +24,10 @@ export class ProductEntity extends EntityRelationalHelper {
   stock: number;
 
   @Column({
-    nullable: true,
+    nullable: false,
     type: String,
   })
-  unit?: string | null;
+  unit: string;
 
   @Column({
     nullable: false,
@@ -36,10 +36,10 @@ export class ProductEntity extends EntityRelationalHelper {
   price: number;
 
   @Column({
-    nullable: true,
+    nullable: false,
     type: String,
   })
-  description?: string | null;
+  description: string;
 
   @Column({
     nullable: false,

@@ -1,3 +1,4 @@
+import { UsersModule } from '../users/users.module';
 import {
   // do not remove this comment
   Module,
@@ -8,6 +9,8 @@ import { RelationalOrderPersistenceModule } from './infrastructure/persistence/r
 
 @Module({
   imports: [
+    UsersModule,
+
     // do not remove this comment
     RelationalOrderPersistenceModule,
   ],

@@ -42,6 +42,7 @@ import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
+    ProductsModule,
     PaymentsModule,
     OrderItemsModule,
     OrdersModule,

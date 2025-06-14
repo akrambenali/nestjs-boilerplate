@@ -2,7 +2,6 @@ import {
   // decorators here
 
   IsString,
-  IsOptional,
   IsNumber,
   IsBoolean,
 } from 'class-validator';
@@ -28,12 +27,11 @@ export class CreateProductDto {
   stock: number;
 
   @ApiProperty({
-    required: false,
+    required: true,
     type: () => String,
   })
-  @IsOptional()
   @IsString()
-  unit?: string | null;
+  unit: string;
 
   @ApiProperty({
     required: true,
@@ -43,12 +41,11 @@ export class CreateProductDto {
   price: number;
 
   @ApiProperty({
-    required: false,
+    required: true,
     type: () => String,
   })
-  @IsOptional()
   @IsString()
-  description?: string | null;
+  description: string;
 
   @ApiProperty({
     required: true,

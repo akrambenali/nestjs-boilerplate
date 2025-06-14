@@ -1,6 +1,11 @@
+import { UsersService } from '../users/users.service';
+import { User } from '../users/domain/user';
+
 import {
   // common
   Injectable,
+  HttpStatus,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -11,20 +16,36 @@ import { Order } from './domain/order';
 @Injectable()
 export class OrdersService {
   constructor(
+    private readonly userService: UsersService,
+
     // Dependencies here
     private readonly orderRepository: OrderRepository,
   ) {}
 
-  async create(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    createOrderDto: CreateOrderDto,
-  ) {
+  async create(createOrderDto: CreateOrderDto) {
     // Do not remove comment below.
     // <creating-property />
+    const userObject = await this.userService.findById(createOrderDto.user.id);
+    if (!userObject) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          user: 'notExists',
+        },
+      });
+    }
+    const user = userObject;
 
     return this.orderRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
+      user,
+
+      paymentStatus: createOrderDto.paymentStatus,
+
+      totalAmount: createOrderDto.totalAmount,
+
+      status: createOrderDto.status,
     });
   }
 
@@ -51,15 +72,38 @@ export class OrdersService {
 
   async update(
     id: Order['id'],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     updateOrderDto: UpdateOrderDto,
   ) {
     // Do not remove comment below.
     // <updating-property />
+    let user: User | undefined = undefined;
+
+    if (updateOrderDto.user) {
+      const userObject = await this.userService.findById(
+        updateOrderDto.user.id,
+      );
+      if (!userObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            user: 'notExists',
+          },
+        });
+      }
+      user = userObject;
+    }
 
     return this.orderRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
+      user,
+
+      paymentStatus: updateOrderDto.paymentStatus,
+
+      totalAmount: updateOrderDto.totalAmount,
+
+      status: updateOrderDto.status,
     });
   }
 
