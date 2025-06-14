@@ -5,13 +5,13 @@ export class OrderFields1749905762212 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "order" ADD "paymentStatus" character varying NOT NULL`,
+      `ALTER TABLE "order" ADD "paymentStatus" integer NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "order" ADD "totalAmount" integer NOT NULL`,
     );
     await queryRunner.query(
-      `ALTER TABLE "order" ADD "status" character varying NOT NULL`,
+      `ALTER TABLE "order" ADD "status" integer NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "order" ADD "userId" integer NOT NULL`,

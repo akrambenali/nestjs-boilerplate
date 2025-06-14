@@ -9,10 +9,10 @@ export class Order {
   user: User;
 
   @ApiProperty({
-    type: () => String,
+    type: () => Number,
     nullable: false,
   })
-  paymentStatus: string;
+  paymentStatus: number;
 
   @ApiProperty({
     type: () => Number,
@@ -21,10 +21,10 @@ export class Order {
   totalAmount: number;
 
   @ApiProperty({
-    type: () => String,
+    type: () => Number,
     nullable: false,
   })
-  status: string;
+  status: number;
 
   @ApiProperty({
     type: String,

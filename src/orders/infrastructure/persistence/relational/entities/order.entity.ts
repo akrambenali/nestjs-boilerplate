@@ -19,9 +19,9 @@ export class OrderEntity extends EntityRelationalHelper {
 
   @Column({
     nullable: false,
-    type: String,
+    type: Number,
   })
-  paymentStatus: string;
+  paymentStatus: number;
 
   @Column({
     nullable: false,
@@ -31,9 +31,9 @@ export class OrderEntity extends EntityRelationalHelper {
 
   @Column({
     nullable: false,
-    type: String,
+    type: Number,
   })
-  status: string;
+  status: number;
 
   @PrimaryGeneratedColumn('uuid')
   id: string;

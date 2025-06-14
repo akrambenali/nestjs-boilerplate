@@ -3,7 +3,6 @@ import { UserDto } from '../../users/dto/user.dto';
 import {
   // decorators here
 
-  IsString,
   IsNumber,
   ValidateNested,
   IsNotEmptyObject,
@@ -33,8 +32,8 @@ export class CreateOrderDto {
     required: true,
     type: () => String,
   })
-  @IsString()
-  paymentStatus: string;
+  @IsNumber()
+  paymentStatus: number;
 
   @ApiProperty({
     required: true,
@@ -47,8 +46,8 @@ export class CreateOrderDto {
     required: true,
     type: () => String,
   })
-  @IsString()
-  status: string;
+  @IsNumber()
+  status: number;
 
   // Don't forget to use the class-validator decorators in the DTO properties.
 }
