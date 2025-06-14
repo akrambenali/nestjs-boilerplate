@@ -5,7 +5,7 @@ export class PaymentFields1749906577243 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "payment" ADD "method" character varying NOT NULL`,
+      `ALTER TABLE "payment" ADD "method" integer NOT NULL`,
     );
     await queryRunner.query(
       `ALTER TABLE "payment" ADD "paymentDate" TIMESTAMP NOT NULL`,

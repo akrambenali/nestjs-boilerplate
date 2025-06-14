@@ -19,9 +19,9 @@ export class PaymentEntity extends EntityRelationalHelper {
 
   @Column({
     nullable: false,
-    type: String,
+    type: Number,
   })
-  method: string;
+  method: number;
 
   @Column({
     nullable: false,

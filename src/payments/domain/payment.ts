@@ -9,10 +9,10 @@ export class Payment {
   order: Order;
 
   @ApiProperty({
-    type: () => String,
+    type: () => Number,
     nullable: false,
   })
-  method: string;
+  method: number;
 
   @ApiProperty({
     type: () => Date,

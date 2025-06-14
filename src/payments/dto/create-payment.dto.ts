@@ -5,7 +5,6 @@ import {
 
   IsNumber,
   IsDate,
-  IsString,
   ValidateNested,
   IsNotEmptyObject,
 } from 'class-validator';
@@ -34,10 +33,10 @@ export class CreatePaymentDto {
 
   @ApiProperty({
     required: true,
-    type: () => String,
+    type: () => Number,
   })
-  @IsString()
-  method: string;
+  @IsNumber()
+  method: number;
 
   @ApiProperty({
     required: true,
