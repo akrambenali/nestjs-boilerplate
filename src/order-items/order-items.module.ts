@@ -1,3 +1,5 @@
+import { ProductsModule } from '../products/products.module';
+import { OrdersModule } from '../orders/orders.module';
 import {
   // do not remove this comment
   Module,
@@ -8,6 +10,10 @@ import { RelationalOrderItemPersistenceModule } from './infrastructure/persisten
 
 @Module({
   imports: [
+    ProductsModule,
+
+    OrdersModule,
+
     // do not remove this comment
     RelationalOrderItemPersistenceModule,
   ],

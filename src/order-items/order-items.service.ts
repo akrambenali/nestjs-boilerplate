@@ -1,6 +1,12 @@
+import { ProductsService } from '../products/products.service';
+import { Product } from '../products/domain/product';
+
+import { OrdersService } from '../orders/orders.service';
 import {
   // common
   Injectable,
+  HttpStatus,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { UpdateOrderItemDto } from './dto/update-order-item.dto';
@@ -11,20 +17,54 @@ import { OrderItem } from './domain/order-item';
 @Injectable()
 export class OrderItemsService {
   constructor(
+    private readonly productService: ProductsService,
+
+    private readonly orderService: OrdersService,
+
     // Dependencies here
     private readonly orderItemRepository: OrderItemRepository,
   ) {}
 
-  async create(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    createOrderItemDto: CreateOrderItemDto,
-  ) {
+  async create(createOrderItemDto: CreateOrderItemDto) {
     // Do not remove comment below.
     // <creating-property />
+
+    const productObject = await this.productService.findById(
+      createOrderItemDto.product.id,
+    );
+    if (!productObject) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          product: 'notExists',
+        },
+      });
+    }
+    const product = productObject;
+
+    const orderObject = await this.orderService.findById(
+      createOrderItemDto.order.id,
+    );
+    if (!orderObject) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          order: 'notExists',
+        },
+      });
+    }
+    const order = orderObject;
 
     return this.orderItemRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
+      unitPrice: createOrderItemDto.unitPrice,
+
+      quantity: createOrderItemDto.quantity,
+
+      product,
+
+      order,
     });
   }
 
@@ -51,15 +91,56 @@ export class OrderItemsService {
 
   async update(
     id: OrderItem['id'],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     updateOrderItemDto: UpdateOrderItemDto,
   ) {
     // Do not remove comment below.
     // <updating-property />
 
+    let product: Product | undefined = undefined;
+
+    if (updateOrderItemDto.product) {
+      const productObject = await this.productService.findById(
+        updateOrderItemDto.product.id,
+      );
+      if (!productObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            product: 'notExists',
+          },
+        });
+      }
+      product = productObject;
+    }
+
+    let order: Order | undefined = undefined;
+
+    if (updateOrderItemDto.order) {
+      const orderObject = await this.orderService.findById(
+        updateOrderItemDto.order.id,
+      );
+      if (!orderObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            order: 'notExists',
+          },
+        });
+      }
+      order = orderObject;
+    }
+
     return this.orderItemRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
+      unitPrice: updateOrderItemDto.unitPrice,
+
+      quantity: updateOrderItemDto.quantity,
+
+      product,
+
+      order,
     });
   }
 
