@@ -1,3 +1,4 @@
+import { OrdersModule } from '../orders/orders.module';
 import {
   // do not remove this comment
   Module,
@@ -8,6 +9,8 @@ import { RelationalPaymentPersistenceModule } from './infrastructure/persistence
 
 @Module({
   imports: [
+    OrdersModule,
+
     // do not remove this comment
     RelationalPaymentPersistenceModule,
   ],
