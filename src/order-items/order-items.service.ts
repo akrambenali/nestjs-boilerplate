@@ -13,6 +13,7 @@ import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { OrderItemRepository } from './infrastructure/persistence/order-item.repository';
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { OrderItem } from './domain/order-item';
+import { Order } from '../orders/domain/order';
 
 @Injectable()
 export class OrderItemsService {
