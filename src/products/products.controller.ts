@@ -8,10 +8,9 @@ import {
   Delete,
   UseGuards,
   Query,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
-import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -19,18 +18,23 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { Product } from './domain/product';
 import { AuthGuard } from '@nestjs/passport';
+
 import {
   InfinityPaginationResponse,
   InfinityPaginationResponseDto,
 } from '../utils/dto/infinity-pagination-response.dto';
+import { NullableType } from '../utils/types/nullable.type';
 import { infinityPagination } from '../utils/infinity-pagination';
-import { FindAllProductsDto } from './dto/find-all-products.dto';
+import { ProductsService } from './products.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { Product } from './domain/product';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { QueryProductsDto } from './dto/query-products.dto';
 
-@ApiTags('Products')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
+@ApiTags('Products')
 @Controller({
   path: 'products',
   version: '1',
@@ -38,20 +42,22 @@ import { FindAllProductsDto } from './dto/find-all-products.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()
   @ApiCreatedResponse({
     type: Product,
   })
-  create(@Body() createProductDto: CreateProductDto) {
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() createProductDto: CreateProductDto): Promise<Product> {
     return this.productsService.create(createProductDto);
   }
 
-  @Get()
   @ApiOkResponse({
     type: InfinityPaginationResponse(Product),
   })
+  @Get()
+  @HttpCode(HttpStatus.OK)
   async findAll(
-    @Query() query: FindAllProductsDto,
+    @Query() query: QueryProductsDto,
   ): Promise<InfinityPaginationResponseDto<Product>> {
     const page = query?.page ?? 1;
     let limit = query?.limit ?? 10;
@@ -60,7 +66,9 @@ export class ProductsController {
     }
 
     return infinityPagination(
-      await this.productsService.findAllWithPagination({
+      await this.productsService.findManyWithPagination({
+        filterOptions: query?.filters,
+        sortOptions: query?.sort,
         paginationOptions: {
           page,
           limit,
@@ -70,29 +78,34 @@ export class ProductsController {
     );
   }
 
+  @ApiOkResponse({
+    type: Product,
+  })
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   @ApiParam({
     name: 'id',
     type: String,
     required: true,
   })
-  @ApiOkResponse({
-    type: Product,
-  })
-  findById(@Param('id') id: string) {
+  findOne(@Param('id') id: Product['id']): Promise<NullableType<Product>> {
     return this.productsService.findById(id);
   }
 
+  @ApiOkResponse({
+    type: Product,
+  })
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   @ApiParam({
     name: 'id',
     type: String,
     required: true,
   })
-  @ApiOkResponse({
-    type: Product,
-  })
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  update(
+    @Param('id') id: Product['id'],
+    @Body() updateProductDto: UpdateProductDto,
+  ): Promise<Product | null> {
     return this.productsService.update(id, updateProductDto);
   }
 
@@ -102,7 +115,8 @@ export class ProductsController {
     type: String,
     required: true,
   })
-  remove(@Param('id') id: string) {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: Product['id']): Promise<void> {
     return this.productsService.remove(id);
   }
 }

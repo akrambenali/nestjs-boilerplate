@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Status } from '../../statuses/domain/status';
 
 export class Product {
   @ApiProperty({
-    type: () => Boolean,
-    nullable: false,
+    type: () => Status,
   })
-  isActive: boolean;
+  status?: Status;
 
   @ApiProperty({
     type: () => Number,

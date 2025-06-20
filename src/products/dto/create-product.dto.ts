@@ -3,21 +3,22 @@ import {
 
   IsString,
   IsNumber,
-  IsBoolean,
+  IsOptional,
 } from 'class-validator';
 
 import {
   // decorators here
   ApiProperty,
+  ApiPropertyOptional,
 } from '@nestjs/swagger';
+import { StatusDto } from '../../statuses/dto/status.dto';
+import { Type } from 'class-transformer';
 
 export class CreateProductDto {
-  @ApiProperty({
-    required: true,
-    type: () => Boolean,
-  })
-  @IsBoolean()
-  isActive: boolean;
+  @ApiPropertyOptional({ type: StatusDto })
+  @IsOptional()
+  @Type(() => StatusDto)
+  status?: StatusDto;
 
   @ApiProperty({
     required: true,

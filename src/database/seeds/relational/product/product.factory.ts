@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductEntity } from '../../../../products/infrastructure/persistence/relational/entities/product.entity';
+import { StatusEnum } from '../../../../statuses/statuses.enum';
 
 @Injectable()
 export class ProductFactory {
@@ -19,7 +20,10 @@ export class ProductFactory {
         price: faker.number.int({ min: 1000, max: 100000 }),
         description: faker.commerce.productDescription(),
         stock: faker.number.int({ min: 0, max: 100 }),
-        isActive: faker.datatype.boolean(),
+        status: {
+          id: StatusEnum.active,
+          name: 'Active',
+        },
         unit: faker.commerce.productMaterial(),
       });
     };

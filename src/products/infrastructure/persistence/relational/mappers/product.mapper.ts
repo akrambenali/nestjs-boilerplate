@@ -1,3 +1,4 @@
+import { StatusEntity } from '../../../../../statuses/infrastructure/persistence/relational/entities/status.entity';
 import { Product } from '../../../../domain/product';
 
 import { ProductEntity } from '../entities/product.entity';
@@ -5,7 +6,7 @@ import { ProductEntity } from '../entities/product.entity';
 export class ProductMapper {
   static toDomain(raw: ProductEntity): Product {
     const domainEntity = new Product();
-    domainEntity.isActive = raw.isActive;
+    domainEntity.status = raw.status;
 
     domainEntity.stock = raw.stock;
 
@@ -26,7 +27,15 @@ export class ProductMapper {
 
   static toPersistence(domainEntity: Product): ProductEntity {
     const persistenceEntity = new ProductEntity();
-    persistenceEntity.isActive = domainEntity.isActive;
+
+    let status: StatusEntity | undefined = undefined;
+
+    if (domainEntity.status) {
+      status = new StatusEntity();
+      status.id = Number(domainEntity.status.id);
+    }
+
+    persistenceEntity.status = status;
 
     persistenceEntity.stock = domainEntity.stock;
 

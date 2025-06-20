@@ -3,20 +3,26 @@ import { NullableType } from '../../../utils/types/nullable.type';
 import { IPaginationOptions } from '../../../utils/types/pagination-options';
 import { Product } from '../../domain/product';
 
+import { FilterProductDto, SortProductDto } from '../../dto/query-products.dto';
+
 export abstract class ProductRepository {
   abstract create(
-    data: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
+    data: Omit<Product, 'id' | 'createdAt' | 'deletedAt' | 'updatedAt'>,
   ): Promise<Product>;
 
-  abstract findAllWithPagination({
+  abstract findManyWithPagination({
+    filterOptions,
+    sortOptions,
     paginationOptions,
   }: {
+    filterOptions?: FilterProductDto | null;
+    sortOptions?: SortProductDto[] | null;
     paginationOptions: IPaginationOptions;
   }): Promise<Product[]>;
 
   abstract findById(id: Product['id']): Promise<NullableType<Product>>;
-
   abstract findByIds(ids: Product['id'][]): Promise<Product[]>;
+  abstract findByName(name: Product['name']): Promise<NullableType<Product>>;
 
   abstract update(
     id: Product['id'],

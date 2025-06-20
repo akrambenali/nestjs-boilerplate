@@ -1,88 +1,126 @@
 import {
-  // common
+  HttpStatus,
   Injectable,
+  UnprocessableEntityException,
 } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductRepository } from './infrastructure/persistence/product.repository';
+import { NullableType } from '../utils/types/nullable.type';
+import { StatusEnum } from '../statuses/statuses.enum';
 import { IPaginationOptions } from '../utils/types/pagination-options';
+import { Status } from '../statuses/domain/status';
+import { ProductRepository } from './infrastructure/persistence/product.repository';
 import { Product } from './domain/product';
+import { CreateProductDto } from './dto/create-product.dto';
+import { FilterProductDto, SortProductDto } from './dto/query-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(
-    // Dependencies here
-    private readonly productRepository: ProductRepository,
-  ) {}
+  constructor(private readonly productsRepository: ProductRepository) {}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto): Promise<Product> {
     // Do not remove comment below.
     // <creating-property />
 
-    return this.productRepository.create({
+    let status: Status | undefined = undefined;
+
+    if (createProductDto.status?.id) {
+      const statusObject = Object.values(StatusEnum)
+        .map(String)
+        .includes(String(createProductDto.status.id));
+      if (!statusObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            status: 'statusNotExists',
+          },
+        });
+      }
+
+      status = {
+        id: createProductDto.status.id,
+      };
+    }
+
+    return this.productsRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
-      isActive: createProductDto.isActive,
-
-      stock: createProductDto.stock,
-
-      unit: createProductDto.unit,
-
-      price: createProductDto.price,
-
-      description: createProductDto.description,
-
       name: createProductDto.name,
+      description: createProductDto.description,
+      stock: createProductDto.stock,
+      price: createProductDto.price,
+      unit: createProductDto.unit,
+      status: status,
     });
   }
 
-  findAllWithPagination({
+  findManyWithPagination({
+    filterOptions,
+    sortOptions,
     paginationOptions,
   }: {
+    filterOptions?: FilterProductDto | null;
+    sortOptions?: SortProductDto[] | null;
     paginationOptions: IPaginationOptions;
-  }) {
-    return this.productRepository.findAllWithPagination({
-      paginationOptions: {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-      },
+  }): Promise<Product[]> {
+    return this.productsRepository.findManyWithPagination({
+      filterOptions,
+      sortOptions,
+      paginationOptions,
     });
   }
 
-  findById(id: Product['id']) {
-    return this.productRepository.findById(id);
+  findById(id: Product['id']): Promise<NullableType<Product>> {
+    return this.productsRepository.findById(id);
   }
 
-  findByIds(ids: Product['id'][]) {
-    return this.productRepository.findByIds(ids);
+  findByIds(ids: Product['id'][]): Promise<Product[]> {
+    return this.productsRepository.findByIds(ids);
+  }
+
+  findByName(name: Product['name']): Promise<NullableType<Product>> {
+    return this.productsRepository.findByName(name);
   }
 
   async update(
     id: Product['id'],
-
     updateProductDto: UpdateProductDto,
-  ) {
+  ): Promise<Product | null> {
     // Do not remove comment below.
     // <updating-property />
 
-    return this.productRepository.update(id, {
+    let status: Status | undefined = undefined;
+
+    if (updateProductDto.status?.id) {
+      const statusObject = Object.values(StatusEnum)
+        .map(String)
+        .includes(String(updateProductDto.status.id));
+      if (!statusObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            status: 'statusNotExists',
+          },
+        });
+      }
+
+      status = {
+        id: updateProductDto.status.id,
+      };
+    }
+
+    return this.productsRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
-      isActive: updateProductDto.isActive,
-
-      stock: updateProductDto.stock,
-
-      unit: updateProductDto.unit,
-
-      price: updateProductDto.price,
-
+      name: updateProductDto.description,
       description: updateProductDto.description,
-
-      name: updateProductDto.name,
+      stock: updateProductDto.stock,
+      price: updateProductDto.price,
+      unit: updateProductDto.unit,
+      status,
     });
   }
 
-  remove(id: Product['id']) {
-    return this.productRepository.remove(id);
+  async remove(id: Product['id']): Promise<void> {
+    await this.productsRepository.remove(id);
   }
 }
