@@ -12,8 +12,11 @@ import appConfig from '../../../config/app.config';
 
 import { ProductSeedModule } from './product/product-seed.module';
 
+import { OrderStatusSeedModule } from './order-status/order-status-seed.module';
+
 @Module({
   imports: [
+    OrderStatusSeedModule,
     ProductSeedModule,
     RoleSeedModule,
     StatusSeedModule,
