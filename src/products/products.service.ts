@@ -111,7 +111,7 @@ export class ProductsService {
     return this.productsRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
-      name: updateProductDto.description,
+      name: updateProductDto.name,
       description: updateProductDto.description,
       stock: updateProductDto.stock,
       price: updateProductDto.price,
