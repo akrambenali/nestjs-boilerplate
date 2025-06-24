@@ -40,14 +40,8 @@ import { OrderItemsModule } from './order-items/order-items.module';
 
 import { PaymentsModule } from './payments/payments.module';
 
-import { OrderStatusesModule } from './order-statuses/order-statuses.module';
-
-import { OrderStatusEnumsModule } from './order-status-enums/order-status-enums.module';
-
 @Module({
   imports: [
-    OrderStatusEnumsModule,
-    OrderStatusesModule,
     ProductsModule,
     PaymentsModule,
     OrderItemsModule,
