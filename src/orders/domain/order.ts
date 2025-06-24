@@ -1,18 +1,18 @@
+import { OrderStatus } from '../../order-statuses/domain/order-status';
+import { PaymentStatus } from '../../payment-statuses/domain/payment-status';
 import { User } from '../../users/domain/user';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class Order {
   @ApiProperty({
     type: () => User,
-    nullable: false,
   })
-  user: User;
+  user?: User | null;
 
   @ApiProperty({
-    type: () => Number,
-    nullable: false,
+    type: () => PaymentStatus,
   })
-  paymentStatus: number;
+  paymentStatus?: PaymentStatus | null;
 
   @ApiProperty({
     type: () => Number,
@@ -21,10 +21,9 @@ export class Order {
   totalAmount: number;
 
   @ApiProperty({
-    type: () => Number,
-    nullable: false,
+    type: () => OrderStatus,
   })
-  status: number;
+  status?: OrderStatus | null;
 
   @ApiProperty({
     type: String,

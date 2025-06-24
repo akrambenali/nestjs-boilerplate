@@ -9,19 +9,18 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
+import { OrderStatusEntity } from '../../../../../order-statuses/infrastructure/persistence/relational/entities/order-status.entity';
+import { PaymentStatusEntity } from '../../../../../payment-statuses/infrastructure/persistence/relational/entities/payment-status.entity';
 
 @Entity({
   name: 'order',
 })
 export class OrderEntity extends EntityRelationalHelper {
-  @ManyToOne(() => UserEntity, { eager: true, nullable: false })
-  user: UserEntity;
+  @ManyToOne(() => UserEntity, { eager: true })
+  user?: UserEntity | null;
 
-  @Column({
-    nullable: false,
-    type: Number,
-  })
-  paymentStatus: number;
+  @ManyToOne(() => PaymentStatusEntity, { eager: true })
+  paymentStatus?: PaymentStatusEntity | null;
 
   @Column({
     nullable: false,
@@ -29,11 +28,8 @@ export class OrderEntity extends EntityRelationalHelper {
   })
   totalAmount: number;
 
-  @Column({
-    nullable: false,
-    type: Number,
-  })
-  status: number;
+  @ManyToOne(() => OrderStatusEntity, { eager: true })
+  status?: OrderStatusEntity | null;
 
   @PrimaryGeneratedColumn('uuid')
   id: string;

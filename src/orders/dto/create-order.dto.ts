@@ -17,6 +17,8 @@ import {
   // decorators here
   Type,
 } from 'class-transformer';
+import { OrderStatus } from '../../order-statuses/domain/order-status';
+import { PaymentStatus } from '../../payment-statuses/domain/payment-status';
 
 export class CreateOrderDto {
   @ApiProperty({
@@ -30,10 +32,10 @@ export class CreateOrderDto {
 
   @ApiProperty({
     required: true,
-    type: () => String,
+    type: () => PaymentStatus,
   })
   @IsNumber()
-  paymentStatus: number;
+  paymentStatus: PaymentStatus;
 
   @ApiProperty({
     required: true,
@@ -44,10 +46,10 @@ export class CreateOrderDto {
 
   @ApiProperty({
     required: true,
-    type: () => String,
+    type: () => OrderStatus,
   })
   @IsNumber()
-  status: number;
+  status: OrderStatus;
 
   // Don't forget to use the class-validator decorators in the DTO properties.
 }

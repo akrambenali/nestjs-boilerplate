@@ -1,113 +1,130 @@
-import { UsersService } from '../users/users.service';
-import { User } from '../users/domain/user';
-
 import {
-  // common
-  Injectable,
   HttpStatus,
+  Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderRepository } from './infrastructure/persistence/order.repository';
+import { NullableType } from '../utils/types/nullable.type';
+import { StatusEnum } from '../statuses/statuses.enum';
 import { IPaginationOptions } from '../utils/types/pagination-options';
+import { OrderRepository } from './infrastructure/persistence/order.repository';
 import { Order } from './domain/order';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { OrderStatus } from '../order-statuses/domain/order-status';
+import { FilterOrderDto, SortOrderDto } from './dto/query-orders.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { UserRepository } from '../users/infrastructure/persistence/user.repository';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    private readonly userService: UsersService,
-
-    // Dependencies here
-    private readonly orderRepository: OrderRepository,
+    private readonly ordersRepository: OrderRepository,
+    private readonly usersRepository: UserRepository,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto) {
+  async create(createOrderDto: CreateOrderDto): Promise<Order> {
     // Do not remove comment below.
     // <creating-property />
-    const userObject = await this.userService.findById(createOrderDto.user.id);
-    if (!userObject) {
+    const user = await this.usersRepository.findById(createOrderDto.user.id);
+    if (!user) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
-          user: 'notExists',
+          user: 'userNotExists',
         },
       });
     }
-    const user = userObject;
 
-    return this.orderRepository.create({
+    let status: OrderStatus | undefined = undefined;
+
+    if (createOrderDto.status?.id) {
+      const statusObject = Object.values(StatusEnum)
+        .map(String)
+        .includes(String(createOrderDto.status.id));
+      if (!statusObject) {
+        throw new UnprocessableEntityException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          errors: {
+            status: 'statusNotExists',
+          },
+        });
+      }
+
+      status = {
+        id: createOrderDto.status.id,
+      };
+    }
+
+    return this.ordersRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
-      user,
-
+      user: user,
       paymentStatus: createOrderDto.paymentStatus,
-
       totalAmount: createOrderDto.totalAmount,
-
-      status: createOrderDto.status,
+      status: status,
     });
   }
 
-  findAllWithPagination({
+  findManyWithPagination({
+    filterOptions,
+    sortOptions,
     paginationOptions,
   }: {
+    filterOptions?: FilterOrderDto | null;
+    sortOptions?: SortOrderDto[] | null;
     paginationOptions: IPaginationOptions;
-  }) {
-    return this.orderRepository.findAllWithPagination({
-      paginationOptions: {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-      },
+  }): Promise<Order[]> {
+    return this.ordersRepository.findManyWithPagination({
+      filterOptions,
+      sortOptions,
+      paginationOptions,
     });
   }
 
-  findById(id: Order['id']) {
-    return this.orderRepository.findById(id);
+  findById(id: Order['id']): Promise<NullableType<Order>> {
+    return this.ordersRepository.findById(id);
   }
 
-  findByIds(ids: Order['id'][]) {
-    return this.orderRepository.findByIds(ids);
+  findByIds(ids: Order['id'][]): Promise<Order[]> {
+    return this.ordersRepository.findByIds(ids);
   }
 
   async update(
     id: Order['id'],
-
     updateOrderDto: UpdateOrderDto,
-  ) {
+  ): Promise<Order | null> {
     // Do not remove comment below.
     // <updating-property />
-    let user: User | undefined = undefined;
 
-    if (updateOrderDto.user) {
-      const userObject = await this.userService.findById(
-        updateOrderDto.user.id,
-      );
-      if (!userObject) {
+    let status: OrderStatus | undefined = undefined;
+
+    if (updateOrderDto.status?.id) {
+      const statusObject = Object.values(StatusEnum)
+        .map(String)
+        .includes(String(updateOrderDto.status.id));
+      if (!statusObject) {
         throw new UnprocessableEntityException({
           status: HttpStatus.UNPROCESSABLE_ENTITY,
           errors: {
-            user: 'notExists',
+            status: 'statusNotExists',
           },
         });
       }
-      user = userObject;
+
+      status = {
+        id: updateOrderDto.status.id,
+      };
     }
 
-    return this.orderRepository.update(id, {
+    return this.ordersRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
-      user,
-
       paymentStatus: updateOrderDto.paymentStatus,
-
       totalAmount: updateOrderDto.totalAmount,
-
-      status: updateOrderDto.status,
+      status,
     });
   }
 
-  remove(id: Order['id']) {
-    return this.orderRepository.remove(id);
+  async remove(id: Order['id']): Promise<void> {
+    await this.ordersRepository.remove(id);
   }
 }
