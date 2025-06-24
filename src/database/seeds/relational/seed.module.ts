@@ -14,8 +14,11 @@ import { ProductSeedModule } from './product/product-seed.module';
 
 import { OrderStatusSeedModule } from './order-status/order-status-seed.module';
 
+import { PaymentStatusSeedModule } from './payment-status/payment-status-seed.module';
+
 @Module({
   imports: [
+    PaymentStatusSeedModule,
     OrderStatusSeedModule,
     ProductSeedModule,
     RoleSeedModule,
