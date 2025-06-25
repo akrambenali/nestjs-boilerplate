@@ -65,17 +65,15 @@ export class ProductsController {
       limit = 50;
     }
 
-    return infinityPagination(
-      await this.productsService.findManyWithPagination({
-        filterOptions: query?.filters,
-        sortOptions: query?.sort,
-        paginationOptions: {
-          page,
-          limit,
-        },
-      }),
-      { page, limit },
-    );
+    const products = await this.productsService.findManyWithPagination({
+      filterOptions: query?.filters,
+      sortOptions: query?.sort,
+      paginationOptions: {
+        page,
+        limit,
+      },
+    });
+    return infinityPagination(products, { page, limit });
   }
 
   @ApiOkResponse({

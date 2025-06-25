@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { FindOptionsWhere, Repository, In } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { NullableType } from '../../../../../utils/types/nullable.type';
 import { IPaginationOptions } from '../../../../../utils/types/pagination-options';
 import { ProductRepository } from '../../product.repository';
@@ -37,26 +37,36 @@ export class ProductsRelationalRepository implements ProductRepository {
     sortOptions?: SortProductDto[] | null;
     paginationOptions: IPaginationOptions;
   }): Promise<Product[]> {
-    const where: FindOptionsWhere<ProductEntity> = {};
-    if (filterOptions?.status?.length) {
-      where.status = filterOptions.status.map((status) => ({
-        id: Number(status.id),
-      }));
+    const query = this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.status', 'status');
+    if (filterOptions) {
+      query.andWhere(
+        '(product.name ILIKE :search OR product.description ILIKE :search)',
+        { search: `%${filterOptions.search}%` },
+      );
     }
 
-    const entities = await this.productsRepository.find({
-      skip: (paginationOptions.page - 1) * paginationOptions.limit,
-      take: paginationOptions.limit,
-      where: where,
-      order: sortOptions?.reduce(
-        (accumulator, sort) => ({
-          ...accumulator,
-          [sort.orderBy]: sort.order,
-        }),
-        {},
-      ),
-    });
+    if (filterOptions?.status?.length) {
+      const statusIds = filterOptions.status.map((s) => Number(s.id));
+      query.andWhere('status.id IN (:...statusIds)', { statusIds });
+    }
 
+    if (sortOptions?.length) {
+      for (const sort of sortOptions) {
+        query.addOrderBy(
+          `product.${sort.orderBy}`,
+          sort.order.toUpperCase() as 'ASC' | 'DESC',
+        );
+      }
+    } else {
+      query.addOrderBy('product.createdAt', 'DESC');
+    }
+
+    query.skip((paginationOptions.page - 1) * paginationOptions.limit);
+    query.take(paginationOptions.limit);
+
+    const entities = await query.getMany();
     return entities.map((product) => ProductMapper.toDomain(product));
   }
 

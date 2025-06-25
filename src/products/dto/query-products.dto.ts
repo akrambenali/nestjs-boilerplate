@@ -15,6 +15,10 @@ export class FilterProductDto {
   @ValidateNested({ each: true })
   @Type(() => StatusDto)
   status?: StatusDto[] | null;
+
+  @IsOptional()
+  @IsString()
+  search?: string;
 }
 
 export class SortProductDto {
