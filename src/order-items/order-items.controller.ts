@@ -8,10 +8,10 @@ import {
   Delete,
   UseGuards,
   Query,
+  HttpStatus,
+  HttpCode,
+  SerializeOptions,
 } from '@nestjs/common';
-import { OrderItemsService } from './order-items.service';
-import { CreateOrderItemDto } from './dto/create-order-item.dto';
-import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -19,18 +19,23 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { OrderItem } from './domain/order-item';
 import { AuthGuard } from '@nestjs/passport';
+
 import {
   InfinityPaginationResponse,
   InfinityPaginationResponseDto,
 } from '../utils/dto/infinity-pagination-response.dto';
+import { NullableType } from '../utils/types/nullable.type';
 import { infinityPagination } from '../utils/infinity-pagination';
-import { FindAllOrderItemsDto } from './dto/find-all-order-items.dto';
+import { OrderItemsService } from './order-items.service';
+import { OrderItem } from './domain/order-item';
+import { CreateOrderItemDto } from './dto/create-order-item.dto';
+import { UpdateOrderItemDto } from './dto/update-order-item.dto';
+import { QueryOrderItemDto } from './dto/query-order-items.dto';
 
-@ApiTags('Orderitems')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'))
+@ApiTags('Order Items')
 @Controller({
   path: 'order-items',
   version: '1',
@@ -38,20 +43,22 @@ import { FindAllOrderItemsDto } from './dto/find-all-order-items.dto';
 export class OrderItemsController {
   constructor(private readonly orderItemsService: OrderItemsService) {}
 
-  @Post()
   @ApiCreatedResponse({
     type: OrderItem,
   })
-  create(@Body() createOrderItemDto: CreateOrderItemDto) {
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() createOrderItemDto: CreateOrderItemDto): Promise<OrderItem> {
     return this.orderItemsService.create(createOrderItemDto);
   }
 
-  @Get()
   @ApiOkResponse({
     type: InfinityPaginationResponse(OrderItem),
   })
+  @Get()
+  @HttpCode(HttpStatus.OK)
   async findAll(
-    @Query() query: FindAllOrderItemsDto,
+    @Query() query: QueryOrderItemDto,
   ): Promise<InfinityPaginationResponseDto<OrderItem>> {
     const page = query?.page ?? 1;
     let limit = query?.limit ?? 10;
@@ -60,7 +67,8 @@ export class OrderItemsController {
     }
 
     return infinityPagination(
-      await this.orderItemsService.findAllWithPagination({
+      await this.orderItemsService.findManyWithPagination({
+        sortOptions: query?.sort,
         paginationOptions: {
           page,
           limit,
@@ -70,32 +78,37 @@ export class OrderItemsController {
     );
   }
 
+  @ApiOkResponse({
+    type: OrderItem,
+  })
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   @ApiParam({
     name: 'id',
     type: String,
     required: true,
   })
-  @ApiOkResponse({
-    type: OrderItem,
-  })
-  findById(@Param('id') id: string) {
+  findOne(@Param('id') id: OrderItem['id']): Promise<NullableType<OrderItem>> {
     return this.orderItemsService.findById(id);
   }
 
+  @ApiOkResponse({
+    type: OrderItem,
+  })
+  @SerializeOptions({
+    groups: ['admin'],
+  })
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   @ApiParam({
     name: 'id',
     type: String,
     required: true,
   })
-  @ApiOkResponse({
-    type: OrderItem,
-  })
   update(
-    @Param('id') id: string,
+    @Param('id') id: OrderItem['id'],
     @Body() updateOrderItemDto: UpdateOrderItemDto,
-  ) {
+  ): Promise<OrderItem | null> {
     return this.orderItemsService.update(id, updateOrderItemDto);
   }
 
@@ -105,7 +118,8 @@ export class OrderItemsController {
     type: String,
     required: true,
   })
-  remove(@Param('id') id: string) {
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: OrderItem['id']): Promise<void> {
     return this.orderItemsService.remove(id);
   }
 }

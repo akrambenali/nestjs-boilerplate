@@ -1,151 +1,99 @@
-import { ProductsService } from '../products/products.service';
-import { Product } from '../products/domain/product';
-
-import { OrdersService } from '../orders/orders.service';
 import {
-  // common
-  Injectable,
   HttpStatus,
+  Injectable,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { CreateOrderItemDto } from './dto/create-order-item.dto';
-import { UpdateOrderItemDto } from './dto/update-order-item.dto';
-import { OrderItemRepository } from './infrastructure/persistence/order-item.repository';
+import { NullableType } from '../utils/types/nullable.type';
 import { IPaginationOptions } from '../utils/types/pagination-options';
+import { OrderItemRepository } from './infrastructure/persistence/order-item.repository';
+import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { OrderItem } from './domain/order-item';
-import { Order } from '../orders/domain/order';
+import { SortOrderItemDto } from './dto/query-order-items.dto';
+import { UpdateOrderItemDto } from './dto/update-order-item.dto';
+import { OrderRepository } from '../orders/infrastructure/persistence/order.repository';
+import { ProductRepository } from '../products/infrastructure/persistence/product.repository';
 
 @Injectable()
 export class OrderItemsService {
   constructor(
-    private readonly productService: ProductsService,
-
-    private readonly orderService: OrdersService,
-
-    // Dependencies here
-    private readonly orderItemRepository: OrderItemRepository,
+    private readonly orderItemsRepository: OrderItemRepository,
+    private readonly ordersRepository: OrderRepository,
+    private readonly productsRepository: ProductRepository,
   ) {}
 
-  async create(createOrderItemDto: CreateOrderItemDto) {
+  async create(createOrderItemDto: CreateOrderItemDto): Promise<OrderItem> {
     // Do not remove comment below.
     // <creating-property />
-
-    const productObject = await this.productService.findById(
-      createOrderItemDto.product.id,
-    );
-    if (!productObject) {
-      throw new UnprocessableEntityException({
-        status: HttpStatus.UNPROCESSABLE_ENTITY,
-        errors: {
-          product: 'notExists',
-        },
-      });
-    }
-    const product = productObject;
-
-    const orderObject = await this.orderService.findById(
+    const order = await this.ordersRepository.findById(
       createOrderItemDto.order.id,
     );
-    if (!orderObject) {
+    if (!order) {
       throw new UnprocessableEntityException({
         status: HttpStatus.UNPROCESSABLE_ENTITY,
         errors: {
-          order: 'notExists',
+          order: 'orderNotExists',
         },
       });
     }
-    const order = orderObject;
 
-    return this.orderItemRepository.create({
+    const product = await this.productsRepository.findById(
+      createOrderItemDto.product.id,
+    );
+    if (!product) {
+      throw new UnprocessableEntityException({
+        status: HttpStatus.UNPROCESSABLE_ENTITY,
+        errors: {
+          product: 'productNotExists',
+        },
+      });
+    }
+    return this.orderItemsRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
-      unitPrice: createOrderItemDto.unitPrice,
-
+      order: order,
+      product: product,
       quantity: createOrderItemDto.quantity,
-
-      product,
-
-      order,
+      unitPrice: createOrderItemDto.unitPrice,
     });
   }
 
-  findAllWithPagination({
+  findManyWithPagination({
+    sortOptions,
     paginationOptions,
   }: {
+    sortOptions?: SortOrderItemDto[] | null;
     paginationOptions: IPaginationOptions;
-  }) {
-    return this.orderItemRepository.findAllWithPagination({
-      paginationOptions: {
-        page: paginationOptions.page,
-        limit: paginationOptions.limit,
-      },
+  }): Promise<OrderItem[]> {
+    return this.orderItemsRepository.findManyWithPagination({
+      sortOptions,
+      paginationOptions,
     });
   }
 
-  findById(id: OrderItem['id']) {
-    return this.orderItemRepository.findById(id);
+  findById(id: OrderItem['id']): Promise<NullableType<OrderItem>> {
+    return this.orderItemsRepository.findById(id);
   }
 
-  findByIds(ids: OrderItem['id'][]) {
-    return this.orderItemRepository.findByIds(ids);
+  findByIds(ids: OrderItem['id'][]): Promise<OrderItem[]> {
+    return this.orderItemsRepository.findByIds(ids);
   }
 
   async update(
     id: OrderItem['id'],
-
     updateOrderItemDto: UpdateOrderItemDto,
-  ) {
+  ): Promise<OrderItem | null> {
     // Do not remove comment below.
     // <updating-property />
 
-    let product: Product | undefined = undefined;
-
-    if (updateOrderItemDto.product) {
-      const productObject = await this.productService.findById(
-        updateOrderItemDto.product.id,
-      );
-      if (!productObject) {
-        throw new UnprocessableEntityException({
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            product: 'notExists',
-          },
-        });
-      }
-      product = productObject;
-    }
-
-    let order: Order | undefined = undefined;
-
-    if (updateOrderItemDto.order) {
-      const orderObject = await this.orderService.findById(
-        updateOrderItemDto.order.id,
-      );
-      if (!orderObject) {
-        throw new UnprocessableEntityException({
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            order: 'notExists',
-          },
-        });
-      }
-      order = orderObject;
-    }
-
-    return this.orderItemRepository.update(id, {
+    return this.orderItemsRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
-      unitPrice: updateOrderItemDto.unitPrice,
-
       quantity: updateOrderItemDto.quantity,
-
-      product,
-
-      order,
+      unitPrice: updateOrderItemDto.unitPrice,
     });
   }
 
-  remove(id: OrderItem['id']) {
-    return this.orderItemRepository.remove(id);
+  async remove(id: OrderItem['id']): Promise<void> {
+    await this.orderItemsRepository.remove(id);
   }
 }

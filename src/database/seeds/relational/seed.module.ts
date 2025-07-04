@@ -18,8 +18,11 @@ import { PaymentStatusSeedModule } from './payment-status/payment-status-seed.mo
 
 import { OrderSeedModule } from './order/order-seed.module';
 
+import { OrderItemSeedModule } from './order-item/order-item-seed.module';
+
 @Module({
   imports: [
+    OrderItemSeedModule,
     OrderSeedModule,
     PaymentStatusSeedModule,
     OrderStatusSeedModule,

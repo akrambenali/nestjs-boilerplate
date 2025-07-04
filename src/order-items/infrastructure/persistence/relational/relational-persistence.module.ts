@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { OrderItemRepository } from '../order-item.repository';
-import { OrderItemRelationalRepository } from './repositories/order-item.repository';
+import { OrderItemsRelationalRepository } from './repositories/order-item.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderItemEntity } from './entities/order-item.entity';
 
@@ -9,7 +9,7 @@ import { OrderItemEntity } from './entities/order-item.entity';
   providers: [
     {
       provide: OrderItemRepository,
-      useClass: OrderItemRelationalRepository,
+      useClass: OrderItemsRelationalRepository,
     },
   ],
   exports: [OrderItemRepository],

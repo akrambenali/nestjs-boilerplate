@@ -28,11 +28,11 @@ export class OrderItemEntity extends EntityRelationalHelper {
   })
   quantity: number;
 
-  @ManyToOne(() => ProductEntity, { eager: true, nullable: false })
-  product: ProductEntity;
+  @ManyToOne(() => ProductEntity, { eager: true })
+  product?: ProductEntity | null;
 
-  @ManyToOne(() => OrderEntity, { eager: true, nullable: false })
-  order: OrderEntity;
+  @ManyToOne(() => OrderEntity, { eager: true })
+  order?: OrderEntity | null;
 
   @PrimaryGeneratedColumn('uuid')
   id: string;
