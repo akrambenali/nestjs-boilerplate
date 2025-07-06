@@ -17,24 +17,8 @@ export class OrderStatusSeedService {
     if (!count) {
       await this.repository.save([
         this.repository.create({
-          id: OrderStatusEnum.brouillon,
-          name: 'Brouillon',
-        }),
-        this.repository.create({
-          id: OrderStatusEnum.en_attente_de_paiement,
-          name: 'En attente de paiement',
-        }),
-        this.repository.create({
-          id: OrderStatusEnum.payee,
-          name: 'Payée',
-        }),
-        this.repository.create({
           id: OrderStatusEnum.en_preparation,
           name: 'En préparation',
-        }),
-        this.repository.create({
-          id: OrderStatusEnum.prete_a_retirer,
-          name: 'Prête à retirer',
         }),
         this.repository.create({
           id: OrderStatusEnum.en_livraison,
@@ -43,22 +27,6 @@ export class OrderStatusSeedService {
         this.repository.create({
           id: OrderStatusEnum.livree,
           name: 'Livrée',
-        }),
-        this.repository.create({
-          id: OrderStatusEnum.annulee,
-          name: 'Annulée',
-        }),
-        this.repository.create({
-          id: OrderStatusEnum.echouee,
-          name: 'Échouée',
-        }),
-        this.repository.create({
-          id: OrderStatusEnum.remboursee,
-          name: 'Remboursée',
-        }),
-        this.repository.create({
-          id: OrderStatusEnum.partiellement_livree,
-          name: 'Partiellement livrée',
         }),
       ]);
     }

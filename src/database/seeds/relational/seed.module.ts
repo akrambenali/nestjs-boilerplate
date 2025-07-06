@@ -16,14 +16,8 @@ import { OrderStatusSeedModule } from './order-status/order-status-seed.module';
 
 import { PaymentStatusSeedModule } from './payment-status/payment-status-seed.module';
 
-import { OrderSeedModule } from './order/order-seed.module';
-
-import { OrderItemSeedModule } from './order-item/order-item-seed.module';
-
 @Module({
   imports: [
-    OrderItemSeedModule,
-    OrderSeedModule,
     PaymentStatusSeedModule,
     OrderStatusSeedModule,
     ProductSeedModule,
