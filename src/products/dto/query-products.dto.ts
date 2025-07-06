@@ -18,6 +18,13 @@ export class FilterProductDto {
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    }
+    return undefined;
+  })
   search?: string;
 }
 

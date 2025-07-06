@@ -40,29 +40,45 @@ export class ProductsRelationalRepository implements ProductRepository {
     const query = this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.status', 'status');
-    if (filterOptions) {
+
+    // Recherche sécurisée : on ne filtre que si search est défini, non vide et non undefined
+    if (
+      filterOptions?.search &&
+      typeof filterOptions.search === 'string' &&
+      filterOptions.search.trim().length > 0
+    ) {
+      const searchTerm = `%${filterOptions.search.trim()}%`;
       query.andWhere(
         '(product.name ILIKE :search OR product.description ILIKE :search)',
-        { search: `%${filterOptions.search}%` },
+        { search: searchTerm },
       );
     }
 
+    // Filtre par status si des IDs valides sont présents
     if (filterOptions?.status?.length) {
-      const statusIds = filterOptions.status.map((s) => Number(s.id));
-      query.andWhere('status.id IN (:...statusIds)', { statusIds });
+      const statusIds = filterOptions.status
+        .map((s) => Number(s.id))
+        .filter((id) => !isNaN(id) && id > 0);
+      if (statusIds.length) {
+        query.andWhere('status.id IN (:...statusIds)', { statusIds });
+      }
     }
 
+    // Tri selon options ou par date de création par défaut
     if (sortOptions?.length) {
       for (const sort of sortOptions) {
-        query.addOrderBy(
-          `product.${sort.orderBy}`,
-          sort.order.toUpperCase() as 'ASC' | 'DESC',
-        );
+        if (sort.orderBy && sort.order) {
+          query.addOrderBy(
+            `product.${sort.orderBy}`,
+            sort.order.toUpperCase() as 'ASC' | 'DESC',
+          );
+        }
       }
     } else {
       query.addOrderBy('product.createdAt', 'DESC');
     }
 
+    // Pagination
     query.skip((paginationOptions.page - 1) * paginationOptions.limit);
     query.take(paginationOptions.limit);
 
