@@ -16,10 +16,10 @@ import { EntityRelationalHelper } from '../../../../../utils/relational-entity-h
   name: 'order',
 })
 export class OrderEntity extends EntityRelationalHelper {
-  @ManyToOne(() => OrderStatusEntity, { eager: true, nullable: true })
+  @ManyToOne(() => OrderStatusEntity, { eager: true })
   status?: OrderStatusEntity | null;
 
-  @ManyToOne(() => UserEntity, { eager: true, nullable: true })
+  @ManyToOne(() => UserEntity, { eager: true })
   user?: UserEntity | null;
 
   @Column({
